@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct DismissalProbeWrapper: View {
   @State private var coordinatorRef: DismissalProbe.Coordinator?
