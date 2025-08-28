@@ -2,4 +2,4 @@ test-ios:
 	set -o pipefail && \
 	xcodebuild test \
 	-scheme ZPTooltip \
-	-destination platform="iOS Simulator,name=iPhone 15 Pro Max,OS=17.0.1"
+	-destination platform="iOS Simulator,name=iPhone 16 Pro Max,OS=18.4"
