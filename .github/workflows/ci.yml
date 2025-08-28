@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         xcode:
-          - '16.1'
+          - '16.4'
 
     name: macOS
     runs-on: macos-15
