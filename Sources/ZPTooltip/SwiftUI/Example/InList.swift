@@ -47,19 +47,30 @@ struct InList: View {
   var body: some View {
     ScrollView(showsIndicators: false) {
       VStack {
-        ForEach(viewModel.items) {
-          Text("Item \($0.count)")
-            .fixedSize()
-            .foregroundColor(.black)
-            .frame(maxWidth: .infinity)
-            .padding(10)
-            .tooltipTrigger(
+        ForEach(viewModel.items) { item in
+          HStack {
+            Text("Item \(item.count)")
+              .fixedSize()
+              .foregroundColor(.black)
+              .frame(maxWidth: .infinity)
+              .padding(10)
+            TooltipTrigger(
               config: .init(
-                id: $0.id,
-                selected: viewModel.selectedId) { [weak viewModel] id in
-                  viewModel?.openTooltip(entryID: id)
+                id: item.id,
+                selected: viewModel.selectedId,
+                didSelect: { [weak viewModel] itemId in
+                  viewModel?.openTooltip(entryID: itemId)
                 }
+              ),
+              label: {
+                Image(systemName: "ellipsis")
+                  .resizable()
+                  .aspectRatio(contentMode: .fit)
+                  .frame(maxWidth: 16)
+                  .padding(16)
+              }
             )
+          }
         }
       }
     }

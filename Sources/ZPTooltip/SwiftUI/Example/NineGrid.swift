@@ -78,17 +78,28 @@ struct NineGrid: View {
   
   var body: some View {
     NineGridLayout {
-      ForEach(viewModel.items) {
-        Rectangle()
-          .fill(Color.blue)
-          .overlay(Text("\($0.id)").foregroundColor(.white))
-          .tooltipTrigger(
+      ForEach(viewModel.items) { item in
+        HStack {
+          Rectangle()
+            .fill(Color.blue)
+            .overlay(Text("\(item.id)").foregroundColor(.white))
+          TooltipTrigger(
             config: .init(
-              id: $0.id,
-              selected: viewModel.selectedId) { [weak viewModel] id in
-                viewModel?.openTooltip(entryID: id)
+              id: item.id,
+              selected: viewModel.selectedId,
+              didSelect: { [weak viewModel] itemId in
+                viewModel?.openTooltip(entryID: itemId)
               }
+            ),
+            label: {
+              Image(systemName: "ellipsis")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: 16)
+                .padding(16)
+            }
           )
+        }
       }
     }
     .tooltip(item: $viewModel.destination) { destination in

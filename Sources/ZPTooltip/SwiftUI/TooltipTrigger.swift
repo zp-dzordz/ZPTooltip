@@ -1,44 +1,47 @@
 import SwiftUI
 
-public enum TooltipTriggerStyle {
-  case threeDots
+/// A control that triggers a tooltip.
+///
+/// You create a tooltip trigger by providing a trigger configuration and a label.
+///
+/// The label of a tooltip trigger can be any kind of view:
+///
+///     TooltipTrigger(configuration: configuration) {
+///       Text("...")
+///     }
+///
+
+@available(iOS 17.0, *)
+public struct TooltipTrigger<Label, ID> : View where Label : View, ID: Hashable {
+  let label: Label
+  var config: TriggerConfig<ID>
+  @preconcurrency public init(
+    config: TriggerConfig<ID>,
+    @ViewBuilder label: () -> Label
+  ) {
+    self.config = config
+    self.label = label()
+  }
+  public var body: some View {
+    label
+      .modifier(TooltipTriggerModifier(config: config))
+    
+  }
 }
 
-public struct TriggerConfig<ID:Hashable>: DynamicProperty {
-  let style: TooltipTriggerStyle
+public struct TriggerConfig<ID:Hashable> {
   var id: ID
   var selected: ID?
   var didSelect: (ID) -> Void
 
   public init(
-    style: TooltipTriggerStyle = .threeDots,
     id: ID,
     selected: ID? = nil,
     didSelect: @escaping (ID) -> Void
   ) {
-    self.style = style
     self.id = id
     self.didSelect = didSelect
     self.selected = selected
-  }
-}
-
-extension View {
-  @ViewBuilder public func tooltipTrigger<ID: Hashable>(
-    config: TriggerConfig<ID>
-  ) -> some View {
-    switch config.style {
-    case .threeDots:
-      HStack(spacing: .zero) {
-        self
-        Image(systemName: "ellipsis")
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(maxWidth: 16)
-          .padding(16)
-          .modifier(TooltipTriggerModifier(config: config))
-      }
-    }
   }
 }
 
