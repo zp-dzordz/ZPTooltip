@@ -14,8 +14,8 @@ fileprivate enum Config {
 
 /// Preference key for row frames
 struct RowFrameKey: PreferenceKey {
-  static let defaultValue: [UUID: CGRect] = [:]
-  static func reduce(value: inout [UUID: CGRect], nextValue: () -> [UUID: CGRect]) {
+  static let defaultValue: [UUID: Anchor<CGRect>] = [:]
+  static func reduce(value: inout [UUID: Anchor<CGRect>], nextValue: () -> [UUID: Anchor<CGRect>]) {
     value.merge(nextValue(), uniquingKeysWith: { $1 })
   }
 }
@@ -111,20 +111,31 @@ public struct ListTooltip: View {
           highlightForRow(optionId: option.id, rowId: highlightedId)
         )
         .background(
-          GeometryReader { proxy in
-            Color.clear.preference(
+          Color.clear
+            .anchorPreference(
               key: RowFrameKey.self,
-              value: [option.id: proxy.frame(in: .global)]
+              value: .bounds,
+              transform: { anchor in
+                [option.id: anchor]
+              }
             )
-          }
         )
+      }
+    }
+    .backgroundPreferenceValue(RowFrameKey.self) { anchors in
+      GeometryReader { proxy in
+        Color.clear.onAppear {
+          rowFrames = anchors.mapValues {
+            proxy[$0]
+          }
+        }
+        .onChange(of: anchors) { _, newAnchors in
+          rowFrames = newAnchors.mapValues { proxy[$0] }
+        }
       }
     }
     .onPreferenceChange(TooltipLabelWidthKey.self) { value in
       maxLabelWidth = value
-    }
-    .onPreferenceChange(RowFrameKey.self) { frames in
-      rowFrames = frames
     }
     .onPreferenceChange(ListFrameKey.self) { frame in
       listFrame = frame
