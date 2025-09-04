@@ -6,6 +6,7 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
   @State private var transitionAnchor: UnitPoint = .center
   @State private var tooltipPos: CGPoint = .zero
   @State private var tooltipVisible: Bool = false
+  @State private var cachedTooltip: TooltipContent? = nil
   @Binding private var item: Item?
 
   private let tooltipBody: (Item) -> TooltipContent
@@ -25,10 +26,10 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
       .overlay(
         GeometryReader { proxy in
           ZStack(alignment: .topLeading) {
-            if let item,
-              let triggerFrame = model.tooltipInfo.triggerGlobalFrame
+            if let cachedTooltip,
+               let triggerFrame = model.tooltipInfo.triggerGlobalFrame
             {
-              tooltipBody(item)
+              cachedTooltip
                 .background {
                   GeometryReader { tooltipProxy in
                     Color.clear
@@ -67,12 +68,14 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
       )
       .onChange(of: item, { _, newValue in
         withAnimation {
-          guard let _ = newValue else {
+          guard let item = newValue else {
             model.dismiss()
             tooltipVisible = false
+            cachedTooltip = nil
             return
           }          
-          model.set(dismissCallback: { item = nil })
+          model.set(dismissCallback: { self.item = nil })
+          cachedTooltip = tooltipBody(item)
           tooltipVisible = true
         }
       })
