@@ -7,7 +7,7 @@ final class ZPTooltipTests: XCTestCase {
   
   @MainActor
   func testTooltipsSnapshots() {
-#if(iOS)
+#if os(iOS)
     let config = ViewImageConfig.iPhone13(.portrait)
     let timeout: TimeInterval = 0.5
     

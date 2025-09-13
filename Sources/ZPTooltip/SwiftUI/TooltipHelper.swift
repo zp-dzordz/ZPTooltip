@@ -54,7 +54,7 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
                   .interpolatingSpring(stiffness: 220, damping: 22),
                   value: tooltipVisible
                 )
-              #if(iOS)
+              #if os(iOS)
                 .background(
                   DismissalProbeWrapper(onDismiss: {
                     withAnimation { [weak model] in

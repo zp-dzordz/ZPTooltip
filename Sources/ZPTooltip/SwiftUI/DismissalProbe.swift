@@ -1,6 +1,6 @@
 import SwiftUI
 
-#if(iOS)
+#if os(iOS)
 struct DismissalProbeWrapper: View {
   @State private var coordinatorRef: DismissalProbe.Coordinator?
   let onDismiss: () -> Void

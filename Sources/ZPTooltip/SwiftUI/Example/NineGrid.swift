@@ -1,6 +1,6 @@
 import SwiftUI
 
-#if(iOS)
+#if os(iOS)
 struct NineGridLayout: Layout {
   private let padding: CGFloat = 32
   

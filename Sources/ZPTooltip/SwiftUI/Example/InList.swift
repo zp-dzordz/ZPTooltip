@@ -11,7 +11,7 @@ struct Item: Identifiable {
   }
 }
 
-#if(iOS)
+#if os(iOS)
 
 @Observable
 @MainActor

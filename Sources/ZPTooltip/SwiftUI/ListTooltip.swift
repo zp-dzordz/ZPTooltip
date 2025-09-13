@@ -1,6 +1,6 @@
 import SwiftUI
 
-#if(iOS)
+#if os(iOS)
 
 fileprivate enum Config {
   static let tooltipHorizontalPadding: CGFloat = 16

@@ -1,6 +1,6 @@
 import SwiftUI
 
-#if(iOS)
+#if os(iOS)
 extension ListModel {
   public static var mocked: Self {
     return Self(options: [
