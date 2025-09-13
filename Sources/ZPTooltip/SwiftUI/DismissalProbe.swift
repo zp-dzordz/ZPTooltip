@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if(iOS)
 struct DismissalProbeWrapper: View {
   @State private var coordinatorRef: DismissalProbe.Coordinator?
   let onDismiss: () -> Void
@@ -141,4 +142,4 @@ struct DismissalProbe: UIViewRepresentable {
     }
   }
 }
-
+#endif

@@ -11,6 +11,8 @@ struct Item: Identifiable {
   }
 }
 
+#if(iOS)
+
 @Observable
 @MainActor
 class InListViewModel {
@@ -89,4 +91,4 @@ struct InlistPreviews: PreviewProvider {
     InList(viewModel: .init())
   }
 }
-
+#endif

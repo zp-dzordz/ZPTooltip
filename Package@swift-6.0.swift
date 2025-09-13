@@ -6,7 +6,7 @@ let package = Package(
     platforms: [
       // Namespace available since iOS 14.
       // coordinateSpace modifier available since iOS 17
-      .iOS(.v17)
+      .iOS(.v17), .macOS(.v15)
     ],
     products: [
         .library(

@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if(iOS)
 struct NineGridLayout: Layout {
   private let padding: CGFloat = 32
   
@@ -154,4 +155,4 @@ struct NineGrid_Previews: PreviewProvider {
     }
   }
 }
-
+#endif

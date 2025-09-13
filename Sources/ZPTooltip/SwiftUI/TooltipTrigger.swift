@@ -10,7 +10,7 @@ import SwiftUI
 ///       Text("...")
 ///     }
 ///
-
+#if(iOS)
 @available(iOS 17.0, *)
 public struct TooltipTrigger<Label, ID> : View where Label : View, ID: Hashable {
   let label: Label
@@ -93,3 +93,4 @@ struct TooltipTriggerModifier<ID: Hashable>: ViewModifier {
       }
   }
 }
+#endif

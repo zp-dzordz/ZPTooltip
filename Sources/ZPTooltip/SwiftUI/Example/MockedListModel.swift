@@ -1,5 +1,6 @@
 import SwiftUI
 
+#if(iOS)
 extension ListModel {
   public static var mocked: Self {
     return Self(options: [
@@ -13,3 +14,4 @@ extension ListModel {
     ])
   }
 }
+#endif
