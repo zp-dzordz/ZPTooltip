@@ -36,15 +36,11 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
                       .preference(key: TooltipSizeKey.self, value: tooltipProxy.size)
                   }
                   .onPreferenceChange(TooltipSizeKey.self) { tooltipSize in
-                    
-                        let containerRect = CGRect(origin: .zero, size: proxy.size)
-                        let geom = TooltipGeometryCalculator.compute(
-                          trigger: triggerFrame ,
-                          tooltipSize: tooltipSize,
-                          container: containerRect
-                        )
-                        tooltipPos = geom.position
-                        transitionAnchor = geom.anchor
+                    updateTooltipPosition(
+                      triggerFrame: triggerFrame,
+                      tooltipSize: tooltipSize,
+                      containerSize: proxy.size
+                    )
                   }
                 }
                 .position(tooltipPos)
@@ -56,12 +52,7 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
                 )
               #if os(iOS)
                 .background(
-                  DismissalProbeWrapper(onDismiss: {
-                    withAnimation { [weak model] in
-                      model?.dismiss()
-                      tooltipVisible = false
-                    }
-                  })
+                  DismissalProbeWrapper(onDismiss: dismissTooltip)
                 )
               #endif
             }
@@ -69,20 +60,48 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
         }
       )
       .onChange(of: item, { _, newValue in
-        withAnimation {
-          guard let item = newValue else {
-            model.dismiss()
-            tooltipVisible = false
-            cachedTooltip = nil
-            return
-          }          
-          model.set(dismissCallback: { self.item = nil })
-          cachedTooltip = tooltipBody(item)
-          tooltipVisible = true
-        }
+        handleItemChange(newValue)
       })
       .environment(model)
   }
+  
+  // MARK: - Private Helper Methods
+  
+  private func updateTooltipPosition(
+    triggerFrame: CGRect,
+    tooltipSize: CGSize,
+    containerSize: CGSize
+  ) {
+    let containerRect = CGRect(origin: .zero, size: containerSize)
+    let geometry = TooltipGeometryCalculator.compute(
+      trigger: triggerFrame,
+      tooltipSize: tooltipSize,
+      container: containerRect
+    )
+    tooltipPos = geometry.position
+    transitionAnchor = geometry.anchor
+  }
+  
+  private func dismissTooltip() {
+    withAnimation { [weak model] in
+      model?.dismiss()
+      tooltipVisible = false
+    }
+  }
+  
+  private func handleItemChange(_ newValue: Item?) {
+    withAnimation {
+      guard let item = newValue else {
+        model.dismiss()
+        tooltipVisible = false
+        cachedTooltip = nil
+        return
+      }
+      model.set(dismissCallback: { self.item = nil })
+      cachedTooltip = tooltipBody(item)
+      tooltipVisible = true
+    }
+  }
 }
 
-extension GeometryProxy: @unchecked @retroactive Sendable {}
+// Note: GeometryProxy already conforms to Sendable in SwiftUICore
