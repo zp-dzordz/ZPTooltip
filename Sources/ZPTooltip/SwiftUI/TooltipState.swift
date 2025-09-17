@@ -39,6 +39,10 @@ public final class TooltipState {
       tooltipInfo.current = ns1
     case (let .triggered(ns1), let .triggerFrameReady(_, frame)):
       tooltipInfo = .init(current: ns1, triggerGlobalFrame: frame)
+    case (.idle, let .triggerFrameReady(ns1, frame)):
+      // Handle direct idle -> triggerFrameReady transition
+      // This can occur during rapid view updates or snapshot testing
+      tooltipInfo = .init(current: ns1, triggerGlobalFrame: frame)
     case (.triggerFrameReady, .triggered):
       return
     case (.triggerFrameReady, .idle):

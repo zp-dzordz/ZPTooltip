@@ -87,7 +87,7 @@ struct TooltipTriggerModifier<ID: Hashable>: ViewModifier {
         }
       }
       .onAppear {
-        if(config.selected == selected) {
+        if config.selected == selected {
           state.didTapTrigger(id: id)
         }
       }
