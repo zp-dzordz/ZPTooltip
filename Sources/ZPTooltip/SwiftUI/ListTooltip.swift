@@ -18,7 +18,13 @@ fileprivate enum Config {
 struct RowFrameKey: PreferenceKey {
   static let defaultValue: [UUID: CGRect] = [:]
   static func reduce(value: inout [UUID: CGRect], nextValue: () -> [UUID: CGRect]) {
-    value.merge(nextValue(), uniquingKeysWith: { $1 })
+    // Efficiently merge only when there are actual changes to reduce update frequency
+    let next = nextValue()
+    for (key, newFrame) in next {
+      if value[key] != newFrame {
+        value[key] = newFrame
+      }
+    }
   }
 }
 
@@ -78,6 +84,7 @@ public struct ListTooltip: View {
   @State private var rowFrames: [UUID: CGRect] = [:]
   @State private var listFrame: CGRect = .zero
   @State private var isOutside: Bool = false
+  @State private var pendingFrameUpdate: DispatchWorkItem?
   
   // Haptic feedback for changing selecte
   private let selectionFeedback = UISelectionFeedbackGenerator()
@@ -126,7 +133,24 @@ public struct ListTooltip: View {
       maxLabelWidth = value
     }
     .onPreferenceChange(RowFrameKey.self) { frames in
-      rowFrames = frames
+      // Cancel any pending update to debounce multiple rapid changes
+      pendingFrameUpdate?.cancel()
+      
+      // Only update if frames are actually different to prevent unnecessary updates
+      guard frames != rowFrames else { return }
+      
+      // For immediate interaction responsiveness, update directly without debouncing
+      // if we're in the middle of a drag gesture (when highlightedId is set)
+      if highlightedId != nil {
+        rowFrames = frames
+      } else {
+        // Otherwise, debounce the update slightly to reduce frame pressure
+        let workItem = DispatchWorkItem {
+          rowFrames = frames
+        }
+        pendingFrameUpdate = workItem
+        DispatchQueue.main.async(execute: workItem)
+      }
     }
     .onPreferenceChange(ListFrameKey.self) { frame in
       listFrame = frame
