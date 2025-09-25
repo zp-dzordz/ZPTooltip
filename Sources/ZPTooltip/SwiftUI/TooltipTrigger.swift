@@ -1,15 +1,5 @@
 import SwiftUI
 
-/// A control that triggers a tooltip.
-///
-/// You create a tooltip trigger by providing a trigger configuration and a label.
-///
-/// The label of a tooltip trigger can be any kind of view:
-///
-///     TooltipTrigger(configuration: configuration) {
-///       Text("...")
-///     }
-///
 #if os(iOS)
 @available(iOS 17.0, *)
 public struct TooltipTrigger<Label, ID> : View where Label : View, ID: Hashable {

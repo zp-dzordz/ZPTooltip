@@ -1,7 +1,6 @@
 import SwiftUI
 
 #if os(iOS)
-
 fileprivate enum Config {
   static let tooltipHorizontalPadding: CGFloat = 16
   static let tooltipVerticalPadding: CGFloat = 8
@@ -18,6 +17,7 @@ fileprivate enum Config {
 struct RowFrameKey: PreferenceKey {
   static let defaultValue: [UUID: CGRect] = [:]
   static func reduce(value: inout [UUID: CGRect], nextValue: () -> [UUID: CGRect]) {
+    guard nextValue().count > .zero else { return }
     value.merge(nextValue(), uniquingKeysWith: { $1 })
   }
 }
@@ -34,6 +34,7 @@ struct ListFrameKey: PreferenceKey {
 struct TooltipLabelWidthKey: PreferenceKey {
   static let defaultValue: CGFloat = .zero
   static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+    guard value != nextValue() else { return }
     value = max(value, nextValue())
   }
 }
@@ -70,6 +71,32 @@ public final class ListModel: Equatable, Identifiable {
   }
 }
 
+struct TooltipLabel: View {
+  var option: ListOption
+  var maxLabelWidth: CGFloat
+  
+  var body: some View {
+    HStack {
+      Text(option.label)
+        .font(.callout)
+        .fixedSize()
+        .background(
+          GeometryReader { proxy in
+            Color.clear
+              .preference(key: TooltipLabelWidthKey.self, value: proxy.size.width)
+          }
+        )
+        .frame(width: maxLabelWidth + Config.labelIconPadding, alignment: .leading)
+      option.icon
+        .resizable()
+        .aspectRatio(contentMode: .fit)
+        .frame(width: Config.iconSize.width, height: Config.iconSize.height)
+    }
+    .padding(.horizontal, Config.tooltipHorizontalPadding)
+    .padding(.vertical, Config.tooltipVerticalPadding)
+  }
+}
+
 public struct ListTooltip: View {
   let model: ListModel
   
@@ -91,47 +118,23 @@ public struct ListTooltip: View {
       ForEach(model.options, id: \.id) { option in
         if model.options.first?.id != option.id {
           Divider()
+            .frame(width: maxLabelWidth)
         }
-        HStack {
-          Text(option.label)
-            .font(.callout)
-            .fixedSize()
-            .background(
-              GeometryReader { proxy in
-                Color.clear
-                  .preference(key: TooltipLabelWidthKey.self, value: proxy.size.width)
-              }
-            )
-            .frame(width: maxLabelWidth + Config.labelIconPadding, alignment: .leading)
-          option.icon
-            .resizable()
-            .frame(width: Config.iconSize.width, height: Config.iconSize.height)
-        }
-        .padding(.horizontal, Config.tooltipHorizontalPadding)
-        .padding(.vertical, Config.tooltipVerticalPadding)
-        .background(
-          highlightForRow(optionId: option.id, rowId: highlightedId)
-        )
-        .background(
-          GeometryReader { proxy in
-            Color.clear.preference(
-              key: RowFrameKey.self,
-              value: [option.id: proxy.frame(in: .global)]
-            )
-          }
-        )
+        TooltipLabel(option: option, maxLabelWidth: maxLabelWidth)
+          .background(
+            highlightForRow(optionId: option.id, rowId: highlightedId)
+          )
+          .background(
+            GeometryReader { proxy in
+              Color.clear
+                .preference(
+                  key: RowFrameKey.self,
+                  value: [option.id: proxy.frame(in: .named("tooltip"))]
+                )
+            }
+          )
       }
     }
-    .onPreferenceChange(TooltipLabelWidthKey.self) { value in
-      maxLabelWidth = value
-    }
-    .onPreferenceChange(RowFrameKey.self) { frames in
-      rowFrames = frames
-    }
-    .onPreferenceChange(ListFrameKey.self) { frame in
-      listFrame = frame
-    }
-    .frame(width: maxLabelWidth + Config.labelIconPadding + Config.iconSize.width + 2 * Config.tooltipHorizontalPadding)
     .clipped()
     .background(
       GeometryReader { proxy in
@@ -150,12 +153,22 @@ public struct ListTooltip: View {
     )
     .scaleEffect(isOutside ? Config.scaledTooltipSize : 1.0)
     .animation(.spring(), value: isOutside)
+    .onPreferenceChange(TooltipLabelWidthKey.self) { value in
+      maxLabelWidth = value
+    }
+    .onPreferenceChange(RowFrameKey.self) { frames in
+      rowFrames = frames
+    }
+    .onPreferenceChange(ListFrameKey.self) { frame in
+      listFrame = frame
+    }
+    .coordinateSpace(.named("tooltip"))
     .gesture(dragGesture)
   }
   
   private var dragGesture: some Gesture {
     LongPressGesture(minimumDuration: 0.1)
-      .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .global))
+      .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .named("tooltip")))
       .onChanged { value in
         switch value {
         case .second(true, let drag):
@@ -194,7 +207,6 @@ public struct ListTooltip: View {
   }
   
   @ViewBuilder func highlightForRow(optionId: UUID, rowId: UUID?) -> some View {
-    
     Group {
       if highlightedId == optionId {
         if optionId == model.options.first?.id {
