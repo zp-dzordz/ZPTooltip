@@ -3,10 +3,9 @@
 *A SwiftUI tooltip implementation attempting to mimic the Apple Podcasts app tooltip behavior.*
 
 <div align="center">
-  <video width="400" controls>
-    <source src="demo.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+
+https://github.com/user-attachments/assets/5634dad6-df5c-4cc8-a1f2-df6e4e86be9a
+
 </div>
 
 ---
