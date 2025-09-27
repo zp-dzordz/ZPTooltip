@@ -242,10 +242,6 @@ struct RectCornerShape: Shape {
   }
 }
 
-#Preview {
-  ListTooltip(model: .mocked)
-}
-
 extension Color {
   static var random: Color {
     return .init(hue: CGFloat.random(in: 0...1), saturation: CGFloat.random(in: 0...1), brightness: CGFloat.random(in: 0...1))
