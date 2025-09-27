@@ -3,10 +3,10 @@ import SwiftUI
 import XCTest
 @testable import ZPTooltip
 
-final class ZPTooltipTests: XCTestCase {
+final class ExamplesTests: XCTestCase {
   
   @MainActor
-  func testTooltipsSnapshots() {
+  func testNineGridSnapshots() {
 #if os(iOS)
     let config = ViewImageConfig.iPhone13(.portrait)
     let timeout: TimeInterval = 0.5
@@ -29,6 +29,7 @@ final class ZPTooltipTests: XCTestCase {
           for: timeout,
           on: .image(
             on: .iPhone13,
+            drawHierarchyInKeyWindow: true,
             precision: 0.98
           )
         ),
@@ -38,4 +39,3 @@ final class ZPTooltipTests: XCTestCase {
     #endif
   }
 }
-

@@ -14,12 +14,6 @@ let package = Package(
             targets: ["ZPTooltip"]
         ),
     ],
-    dependencies: [
-      .package(
-        url: "https://github.com/pointfreeco/swift-snapshot-testing",
-        from: "1.12.0"
-      )
-    ],
     targets: [
         .target(
             name: "ZPTooltip"
@@ -27,11 +21,7 @@ let package = Package(
         .testTarget(
             name: "ZPTooltipTests",
             dependencies: [
-              "ZPTooltip",
-              .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
-            ],
-            exclude: [
-              "__Snapshots__"
+              "ZPTooltip"
             ]
         )
     ]
