@@ -23,7 +23,7 @@ public struct TriggerConfig<ID:Hashable> {
   var id: ID
   var selected: ID?
   var didSelect: (ID) -> Void
-
+  
   public init(
     id: ID,
     selected: ID? = nil,
@@ -42,7 +42,7 @@ struct TooltipTriggerModifier<ID: Hashable>: ViewModifier {
   @Namespace private var id
   @Environment(TooltipState.self) private var state
   let selected: ID?
-
+  
   init(config: TriggerConfig<ID>) {
     self.config = config
     self.selected = config.id
@@ -52,6 +52,10 @@ struct TooltipTriggerModifier<ID: Hashable>: ViewModifier {
     content
       .contentShape(.rect)
       .onTapGesture {
+        guard state.tooltipInfo.current == nil else {
+          state.dismissIfNeeded()
+          return
+        }
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.prepare()
         generator.impactOccurred()   // haptic feedback
@@ -64,13 +68,10 @@ struct TooltipTriggerModifier<ID: Hashable>: ViewModifier {
               Color.clear
                 .onAppear {
                   state.set(
-                    triggerFrame: proxy.frame(in: .named("root")),
+                    triggerFrame: proxy.frame(in: .named(tooltipCoordinateSpace)),
                     for: id
                   )
                   config.didSelect(config.id)
-                }
-                .onDisappear {
-                  state.dismiss(id: id)
                 }
             }
           }

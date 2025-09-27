@@ -12,7 +12,6 @@ struct Item: Identifiable {
 }
 
 #if os(iOS)
-
 @Observable
 @MainActor
 class InListViewModel {
@@ -61,6 +60,7 @@ struct InList: View {
                 id: item.id,
                 selected: viewModel.selectedId,
                 didSelect: { [weak viewModel] itemId in
+//                  print("Here!")
                   viewModel?.openTooltip(entryID: itemId)
                 }
               ),

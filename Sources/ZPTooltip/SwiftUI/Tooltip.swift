@@ -1,5 +1,7 @@
 import SwiftUI
 
+let tooltipCoordinateSpace = "root"
+
 extension View {
   public func tooltip<Item, Content>(
     item: Binding<Item?>,

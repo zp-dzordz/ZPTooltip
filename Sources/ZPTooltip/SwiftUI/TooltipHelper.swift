@@ -4,13 +4,13 @@ import SwiftUI
 struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
   @State var model: TooltipState = .init()
   @State private var transitionAnchor: UnitPoint = .center
-  @State private var tooltipPos: CGPoint = .zero
-  @State private var tooltipVisible: Bool = false
   @State private var cachedTooltip: TooltipContent? = nil
+  @State private var tooltipPos: CGPoint = .zero
+  @State private var tooltipFrame: CGRect?
   @Binding private var item: Item?
-
+  
   private let tooltipBody: (Item) -> TooltipContent
-
+  
   init(
     item: Binding<Item?>,
     @ViewBuilder tooltipBody: @escaping (Item) -> TooltipContent
@@ -18,16 +18,15 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
     self._item = item
     self.tooltipBody = tooltipBody
   }
-
+  
   func body(content: Content) -> some View {
     content
-      .coordinateSpace(.named("root"))
+      .coordinateSpace(.named(tooltipCoordinateSpace))
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .overlay(
         GeometryReader { proxy in
           ZStack(alignment: .topLeading) {
-            if let cachedTooltip,
-               let triggerFrame = model.tooltipInfo.triggerGlobalFrame
+            if let triggerFrame = tooltipFrame
             {
               cachedTooltip
                 .background {
@@ -43,18 +42,26 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
                     )
                   }
                 }
-                .position(tooltipPos)
-                .scaleEffect(tooltipVisible ? 1 : 0.1, anchor: transitionAnchor)
-                .opacity(tooltipVisible ? 1 : 0)
-                .animation(
-                  .interpolatingSpring(stiffness: 220, damping: 22),
-                  value: tooltipVisible
-                )
-              #if os(iOS)
-                .background(
-                  DismissalProbeWrapper(onDismiss: dismissTooltip)
-                )
-              #endif
+                .opacity(tooltipPos != .zero ? 0 : 1)
+              if tooltipPos != .zero {
+                cachedTooltip
+                  .position(tooltipPos)
+                  .transition(
+                    .scale(0.1, anchor: transitionAnchor)
+                    .combined(with: .opacity)
+                    .animation(
+                      .interpolatingSpring(
+                        stiffness: 220,
+                        damping: 22
+                      )
+                    )
+                  )
+#if os(iOS)
+                  .background(
+                    DismissalProbeWrapper(onDismiss: dismissTooltip)
+                  )
+#endif
+              }
             }
           }
         }
@@ -62,11 +69,13 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
       .onChange(of: item, { _, newValue in
         handleItemChange(newValue)
       })
+      .onChange(of: model.tooltipInfo.triggerGlobalFrame) { _, newFrame in
+        handleTriggerChanged(frame: newFrame)
+      }
       .environment(model)
   }
   
   // MARK: - Private Helper Methods
-  
   private func updateTooltipPosition(
     triggerFrame: CGRect,
     tooltipSize: CGSize,
@@ -83,25 +92,31 @@ struct TooltipHelper<Item: Equatable, TooltipContent: View>: ViewModifier {
   }
   
   private func dismissTooltip() {
-    withAnimation { [weak model] in
-      model?.dismiss()
-      tooltipVisible = false
-    }
+    model.dismiss()
   }
   
   private func handleItemChange(_ newValue: Item?) {
-    withAnimation {
-      guard let item = newValue else {
-        model.dismiss()
-        tooltipVisible = false
-        cachedTooltip = nil
-        return
-      }
-      model.set(dismissCallback: { self.item = nil })
-      cachedTooltip = tooltipBody(item)
-      tooltipVisible = true
+    guard let item = newValue else {
+      model.dismiss()
+      cachedTooltip = nil
+      return
     }
+    model.set(dismissCallback: { self.item = nil })
+    cachedTooltip = tooltipBody(item)
+  }
+  
+  private func reset() {
+    transitionAnchor = .center
+    tooltipPos = .zero
+    cachedTooltip = nil
+    tooltipFrame = .zero
+  }
+  
+  private func handleTriggerChanged(frame: CGRect?) {
+    guard let frame = frame else {
+      reset()
+      return
+    }
+    tooltipFrame = frame
   }
 }
-
-// Note: GeometryProxy already conforms to Sendable in SwiftUICore
