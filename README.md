@@ -1,14 +1,43 @@
 # ZPTooltip
-*Tooltip implementation attempting to mimic Apple Podcast's app tooltip:*
-<br><br>
-<img width="277" height="600" alt="tooltip_apple_podcast" src="https://github.com/user-attachments/assets/ca584df0-35f1-4dab-be09-8630f0a3f483" />
-<br><br><br>
-Behaviors to be implemented:
--	Tapping on the trigger (a user-defined item) displays the tooltip. The tooltip should not be clipped by any view—its full content must be visible and properly positioned within the view.<br>
--	Tapping on a tooltip action closes the tooltip and executes the corresponding action.<br>
--	Long-pressing the tooltip allows the user to pan over available options. When the finger moves over an option, that option is highlighted, and haptic feedback is triggered.<br>
--	When the user is panning over the tooltip and moves their finger outside the tooltip area, the tooltip scales down.<br>
--	If the user taps outside the displayed tooltip area, the tooltip closes.<br>
--	If the tooltip is displayed over a scroll view, the scroll view should still receive pan gestures when the user pans outside the tooltip area. The expected behavior is that the scroll view continues to scroll while the tooltip is dismissed, reducing the number of taps required for the user to resume scrolling.<br>
+
+*A SwiftUI tooltip implementation attempting to mimic the Apple Podcasts app tooltip behavior.*
+
+<div align="center">
+  <video width="400" controls>
+    <source src="demo.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+---
+
+## 🎯 Features
+
+This tooltip implementation provides the following behaviors:
+
+- **Tap to Display**: Tapping on the trigger (a user-defined item) displays the tooltip. The tooltip is intelligently positioned to ensure its full content is visible within the view bounds.
+
+- **Tap Actions**: Tapping on any tooltip action closes the tooltip and executes the corresponding action.
+
+- **Long-Press Interaction**: Long-pressing the tooltip allows users to pan over available options. When a finger moves over an option, that option becomes highlighted and haptic feedback is triggered.
+
+- **Scale Animation**: When panning over the tooltip and moving outside the tooltip area, the tooltip smoothly scales down to provide visual feedback.
+
+- **Dismiss on Outside Tap**: Tapping outside the displayed tooltip area closes the tooltip.
+
+- **Scroll View Compatibility**: When the tooltip is displayed over a scroll view, the scroll view continues to receive pan gestures when the user pans outside the tooltip area. This ensures smooth scrolling behavior while the tooltip is dismissed, reducing the number of taps required to resume scrolling.
+
+---
+
+## 📋 TODO
+
+### High Priority
+- [ ] Move logic contained in `@State` variables of `TooltipHelper` view modifier to `TooltipState` model
+- [ ] Suppress errors related to tapping tooltip trigger in rapid succession
+
+### Documentation
+- [ ] Better documentation and code examples
+- [ ] Add inline code documentation
+- [ ] Create usage guide
 
 
